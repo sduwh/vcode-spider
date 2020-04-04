@@ -17,7 +17,7 @@ class Dispatcher(threading.Thread):
 
     def run(self):
         # TODO: temporary dispatch
-        for namespace in ["POJ"]:
+        for namespace in ["SDUT","HDU", "POJ"]:
             for n in range(1000, 2000):
                 self._queue.put(Task(namespace, str(n)))
 
