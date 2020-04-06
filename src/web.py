@@ -8,6 +8,7 @@ import uuid
 from models import Response
 from storage import RedisChannelStorage
 from common import TARGET_TOPIC
+from logger import logger
 
 
 class BaseHandler(tornado.web.RequestHandler, ABC):
@@ -30,6 +31,7 @@ class ProblemHandler(BaseHandler, ABC):
         else:
             params['task_id'] = uuid.uuid1().hex
             self.storage.save(TARGET_TOPIC, json.dumps(params))
+            logger.info('create crawl problem-{}-{} success'.format(params['oj'], params['key']))
             self.finish(json.dumps(dict(Response(data=params))))
 
     def _get_params(self):
@@ -49,5 +51,7 @@ class WebServer:
         ])
 
     def start(self, port: int = 8081):
+        logger.info('[*]web server starting.....')
         self._app.listen(port)
+        logger.info('[*]web server started.....')
         tornado.ioloop.IOLoop.current().start()

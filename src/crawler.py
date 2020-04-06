@@ -131,5 +131,4 @@ class Crawlers:
         try:
             return Crawlers._crawlers[namespace].crawl(key)
         except Exception as e:
-            # TODO log error
             raise e
