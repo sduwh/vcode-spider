@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Optional
 
 
@@ -40,7 +41,26 @@ class Problem(Base):
                 'source')
 
 
-class Task(Base):
-    def __init__(self, namespace: str, key: str):
+class Response(Base):
+    FAIL = 0
+    SUCCESS = 1
+    ERROR = 2
+
+    def __init__(self, code=1, data=None, message='success'):
+        if data is None:
+            data = {}
+        self.code: Optional[int] = code
+        self.data: Optional[dict] = data
+        self.message: Optional[str] = message
+
+    def keys(self):
+        return ('code',
+                'data',
+                'message')
+
+
+class Task(Base, ABC):
+    def __init__(self, namespace: str, key: str, task_id=""):
         self.namespace: str = namespace
         self.key: str = key
+        self.task_id = task_id

@@ -37,7 +37,11 @@ class RedisChannel(Channel):
         self._client.lpush(topic, json.dumps(message))
 
     def take(self, topic: str, timeout: int = 0) -> Any:
-        return json.loads(self._client.brpop(topic, timeout))
+        data = self._client.brpop(topic, timeout)
+        if data is None:
+            return None
+        response_data = json.loads(data[1].decode('utf-8'))
+        return json.loads(response_data)
 
     def listen(self, listener: ChannelListener, topic: str, timeout: int = 0):
         while not self._stop:

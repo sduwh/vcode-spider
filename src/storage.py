@@ -4,19 +4,27 @@ from channel import RedisChannel
 
 
 class Storage:
-    def save(self, data: Any):
+    def save(self, topic: str, data: Any):
+        raise NotImplementedError
+
+    def take(self, topic: str):
         raise NotImplementedError
 
 
 class RedisChannelStorage(Storage):
-    def __init__(self, host: str, port: int, topic: str):
+    def __init__(self, host: str, port: int):
         self._channel = RedisChannel(host=host, port=port)
-        self._topic = topic
 
-    def save(self, data: Any):
-        self._channel.push(self._topic, data)
+    def save(self, topic: str, data: Any):
+        self._channel.push(topic, data)
+
+    def take(self, topic: str):
+        return self._channel.take(topic=topic)
 
 
 class MockStorage(Storage):
-    def save(self, data: Any):
+    def save(self, topic: str, data: Any):
         pprint(data)
+
+    def take(self, topic: str):
+        return {}

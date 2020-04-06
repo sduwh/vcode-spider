@@ -89,7 +89,6 @@ class HDUCrawler(Crawler):
             problem.hint = desc_nodes[6].prettify()
         except IndexError:
             pass
-        print(dict(problem))
         return problem
 
 
@@ -129,4 +128,8 @@ class Crawlers:
 
     @staticmethod
     def crawl(namespace: str, key: str) -> Problem:
-        return Crawlers._crawlers[namespace].crawl(key)
+        try:
+            return Crawlers._crawlers[namespace].crawl(key)
+        except Exception as e:
+            # TODO log error
+            raise e
