@@ -17,7 +17,7 @@ class Dispatcher(threading.Thread):
 
     def run(self):
         # TODO: temporary dispatch
-        for namespace in ["SDUT","HDU", "POJ"]:
+        for namespace in ["SDUT", "HDU", "POJ"]:
             for n in range(1000, 2000):
                 self._queue.put(Task(namespace, str(n)))
 
@@ -32,14 +32,14 @@ class Worker(threading.Thread):
         while True:
             task: Task = self._queue.get()
             problem: Problem = Crawlers.crawl(task.namespace, task.key)
-            self._storage.save(problem.as_dict())
+            self._storage.save(dict(problem))
 
 
 class Spider:
     def __init__(self, workers: int = 2):
         queue = Queue()
-        # storage = RedisChannelStorage(host="127.0.0.1", port=6379, topic=PROBLEM_TOPIC)  # TODO: temporary local
-        storage = MockStorage()
+        storage = RedisChannelStorage(host="127.0.0.1", port=6379, topic=PROBLEM_TOPIC)
+        # storage = MockStorage()
 
         self._dispatcher = Dispatcher(queue=queue)
         self._workers = []

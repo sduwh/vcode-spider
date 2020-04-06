@@ -2,13 +2,12 @@ from typing import Optional
 
 
 class Base:
-    def as_dict(self) -> dict:
-        r = {}
-        for k in dir(self):
-            v = getattr(self, k)
-            if not k.startswith("__") and not callable(v):
-                r[k] = v
-        return r
+    def keys(self):
+        # select key for dict() method
+        raise NotImplementedError
+
+    def __getitem__(self, item):
+        return getattr(self, item)
 
 
 class Problem(Base):
@@ -25,6 +24,20 @@ class Problem(Base):
         self.sample_output: Optional[str] = None
         self.hint: Optional[str] = None
         self.source: Optional[str] = None
+
+    def keys(self):
+        return ('namespace',
+                'key',
+                'title',
+                'time_limit',
+                'memory_limit',
+                'description',
+                'input',
+                'output',
+                'sample_input',
+                'sample_output',
+                'hint',
+                'source')
 
 
 class Task(Base):
