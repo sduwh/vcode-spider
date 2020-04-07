@@ -43,6 +43,9 @@ class RedisChannel(Channel):
         response_data = json.loads(data[1].decode('utf-8'))
         return json.loads(response_data)
 
+    def set(self, topic: str, message: Any):
+        self._client.set(topic, message)
+
     def listen(self, listener: ChannelListener, topic: str, timeout: int = 0):
         while not self._stop:
             try:

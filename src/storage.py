@@ -21,6 +21,9 @@ class RedisChannelStorage(Storage):
     def take(self, topic: str):
         return self._channel.take(topic=topic)
 
+    def set(self, topic: str, data: Any):
+        self._channel.set(topic, data)
+
 
 class MockStorage(Storage):
     def save(self, topic: str, data: Any):

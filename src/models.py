@@ -13,8 +13,8 @@ class Base:
 
 class Problem(Base):
     def __init__(self, namespace: str, key: str):
-        self.namespace: str = namespace
-        self.key: str = key
+        self.origin: str = namespace
+        self.origin_id: str = key
         self.title: Optional[str] = None
         self.time_limit: Optional[int] = None
         self.memory_limit: Optional[int] = None
@@ -26,9 +26,12 @@ class Problem(Base):
         self.hint: Optional[str] = None
         self.source: Optional[str] = None
 
+    def base_info(self):
+        return self.origin + self.origin_id + self.title
+
     def keys(self):
-        return ('namespace',
-                'key',
+        return ('origin',
+                'origin_id',
                 'title',
                 'time_limit',
                 'memory_limit',

@@ -9,7 +9,7 @@ from crawler import Crawlers
 from models import Problem, Task, Response
 from storage import Storage, RedisChannelStorage
 from logger import logger
-from common import PROBLEM_TOPIC, TARGET_TOPIC, TARGET_RESULT_TOPIC
+from common import PROBLEM_TOPIC, TARGET_TOPIC, TARGET_RESULT_TOPIC, NAMESPACE_TOPIC
 from exceptions import CrawlerException
 from config import spider_config
 
@@ -21,7 +21,7 @@ class Dispatcher(threading.Thread):
 
     def run(self):
         # TODO: temporary dispatch
-        for namespace in ["SDUT", "HDU", "POJ"]:
+        for namespace in spider_config.OJ_NAMESPACE_LIST:
             for n in range(1000, 2000):
                 self._queue.put(Task(namespace, str(n)))
 
@@ -38,13 +38,14 @@ class Worker(threading.Thread):
             try:
                 problem: Problem = Crawlers.crawl(task.namespace, task.key)
                 self._storage.save(PROBLEM_TOPIC, dict(problem))
-                logger.info('crawl problem-{} success'.format(problem.title + problem.key))
+                logger.info('crawl problem-{} success'.format(problem.base_info()))
                 if task.task_id is not "":
                     self._storage.save(TARGET_RESULT_TOPIC,
                                        dict(Response(code=Response.SUCCESS,
                                                      data={'task_id': task.task_id},
                                                      message='success')))
-                    logger.info('task: crawl problem-{} success'.format(problem.title + problem.key))
+                    logger.info(
+                        'task: crawl problem-{} success'.format(problem.base_info()))
             except KeyError:
                 logger.error({'task_id': task.task_id, 'message': 'The task is failed, check the OJ'})
                 self._storage.save(TARGET_RESULT_TOPIC,
@@ -78,7 +79,7 @@ class Spider:
         queue = Queue()
         storage = RedisChannelStorage(host=spider_config.REDIS_HOST, port=spider_config.REDIS_PORT)
         # storage = MockStorage()
-
+        self._storage = storage
         self._dispatcher = Dispatcher(queue=queue)
         self._workers = []
         self._consumer = []
@@ -89,6 +90,7 @@ class Spider:
 
     def start(self):
         logger.info('[*]spider starting.....')
+        self._storage.set(topic=NAMESPACE_TOPIC, data=",".join(spider_config.OJ_NAMESPACE_LIST))
         self._dispatcher.start()
         for w in self._workers:
             w.start()
