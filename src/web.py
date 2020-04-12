@@ -9,11 +9,12 @@ from models import Response
 from storage import RedisChannelStorage
 from common import TARGET_TOPIC
 from logger import logger
+from config import spider_config
 
 
 class BaseHandler(tornado.web.RequestHandler, ABC):
     def __init__(self, *args, **kwargs):
-        self.storage = RedisChannelStorage(host="127.0.0.1", port=6379)
+        self.storage = RedisChannelStorage(host=spider_config.REDIS_HOST, port=spider_config.REDIS_PORT)
         super().__init__(*args, **kwargs)
 
 
@@ -50,7 +51,7 @@ class WebServer:
             (r"/api/v1/problem/namespace/key", ProblemHandler),
         ])
 
-    def start(self, port: int = 8081):
+    def start(self, port: int = spider_config.WEB_PORT):
         logger.info('[*]web server starting.....')
         self._app.listen(port)
         logger.info('[*]web server started.....')
