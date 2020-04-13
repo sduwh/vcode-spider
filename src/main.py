@@ -77,7 +77,9 @@ class Consumer(threading.Thread):
 class Spider:
     def __init__(self, workers: int = 2, consumer=2):
         queue = Queue()
-        storage = RedisChannelStorage(host=spider_config.REDIS_HOST, port=spider_config.REDIS_PORT)
+        storage = RedisChannelStorage(host=spider_config.REDIS_HOST,
+                                      port=spider_config.REDIS_PORT,
+                                      password=spider_config.REDIS_PASSWORD)
         # storage = MockStorage()
         self._storage = storage
         self._dispatcher = Dispatcher(queue=queue)
@@ -105,6 +107,7 @@ class Spider:
 
 
 def main():
+    logger.info(spider_config.REDIS_PASSWORD)
     _thread.start_new_thread(Spider().start, ())
     WebServer().start()
 

@@ -6,6 +6,6 @@ COPY . /app
 
 WORKDIR /app
 
-RUN pip install -r /app/requestments.txt && mkdir -p /log/vcode-spider
+RUN pip install --no-cache-dir -r /app/requestments.txt
 
 ENTRYPOINT ["python3", "/app/src/main.py"]

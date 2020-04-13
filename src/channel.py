@@ -29,8 +29,8 @@ class Channel:
 
 
 class RedisChannel(Channel):
-    def __init__(self, host: str, port: int):
-        self._client = Redis(host=host, port=port)
+    def __init__(self, host: str, port: int, password: str):
+        self._client = Redis(host=host, port=port, password=password)
         self._stop = False
 
     def push(self, topic: str, message: Any):

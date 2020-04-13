@@ -14,7 +14,9 @@ from config import spider_config
 
 class BaseHandler(tornado.web.RequestHandler, ABC):
     def __init__(self, *args, **kwargs):
-        self.storage = RedisChannelStorage(host=spider_config.REDIS_HOST, port=spider_config.REDIS_PORT)
+        self.storage = RedisChannelStorage(host=spider_config.REDIS_HOST,
+                                           port=spider_config.REDIS_PORT,
+                                           password=spider_config.REDIS_PASSWORD)
         super().__init__(*args, **kwargs)
 
 

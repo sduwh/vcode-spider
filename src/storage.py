@@ -12,8 +12,8 @@ class Storage:
 
 
 class RedisChannelStorage(Storage):
-    def __init__(self, host: str, port: int):
-        self._channel = RedisChannel(host=host, port=port)
+    def __init__(self, host: str, port: int, password: str):
+        self._channel = RedisChannel(host=host, port=port, password=password)
 
     def save(self, topic: str, data: Any):
         self._channel.push(topic, data)
