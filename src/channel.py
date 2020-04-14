@@ -40,7 +40,9 @@ class RedisChannel(Channel):
         data = self._client.brpop(topic, timeout)
         if data is None:
             return None
-        response_data = json.loads(data[1].decode('utf-8'))
+        response_data = json.loads(data[1].decode('utf-8').encode('utf-8'))
+        if type(response_data) is dict:
+            return response_data
         return json.loads(response_data)
 
     def set(self, topic: str, message: Any):
@@ -58,3 +60,9 @@ class RedisChannel(Channel):
     def close(self):
         self._stop = True
         self._client.close()
+
+    def lock(self, lock_key) -> None:
+        self._client.set(name=lock_key, value="lock", ex=86400, nx=True)
+
+    def isLock(self, lock_key) -> bool:
+        return self._client.exists(lock_key) != 0

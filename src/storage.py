@@ -18,11 +18,17 @@ class RedisChannelStorage(Storage):
     def save(self, topic: str, data: Any):
         self._channel.push(topic, data)
 
-    def take(self, topic: str):
-        return self._channel.take(topic=topic)
+    def take(self, topic: str, timeout=0):
+        return self._channel.take(topic=topic, timeout=timeout)
 
     def set(self, topic: str, data: Any):
         self._channel.set(topic, data)
+
+    def lock(self, lock_key) -> None:
+        self._channel.lock(lock_key)
+
+    def isLock(self, lock_key) -> bool:
+        return self._channel.isLock(lock_key)
 
 
 class MockStorage(Storage):

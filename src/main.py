@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import threading
 import _thread
 
@@ -12,18 +11,32 @@ from logger import logger
 from common import PROBLEM_TOPIC, TARGET_TOPIC, TARGET_RESULT_TOPIC, NAMESPACE_TOPIC
 from exceptions import CrawlerException
 from config import spider_config
+import socket
 
 
 class Dispatcher(threading.Thread):
     def __init__(self, queue: Queue):
         super().__init__(name="dispatcher", daemon=True)
         self._queue = queue
+        self._channel = RedisChannelStorage(host=spider_config.REDIS_HOST,
+                                            port=spider_config.REDIS_PORT,
+                                            password=spider_config.REDIS_PASSWORD)
+        self.lock_key = spider_config.REDIS_LOCK_KEY
+        self.task_list_topic = spider_config.REDIS_TASK_LIST
 
     def run(self):
-        # TODO: temporary dispatch
-        for namespace in spider_config.OJ_NAMESPACE_LIST:
-            for n in range(1000, 2000):
-                self._queue.put(Task(namespace, str(n)))
+        while True:
+            if self._channel.isLock(self.lock_key) is False:
+                self._channel.lock(self.lock_key)
+                for namespace in spider_config.OJ_NAMESPACE_LIST:
+                    for n in range(1000, 2000):
+                        self._channel.save(self.task_list_topic, {
+                            'namespace': namespace,
+                            'key': n
+                        })
+            spider_task = self._channel.take(self.task_list_topic, timeout=1)
+            if spider_task:
+                self._queue.put(Task(spider_task.get('namespace'), str(spider_task.get('key'))))
 
 
 class Worker(threading.Thread):
@@ -107,7 +120,6 @@ class Spider:
 
 
 def main():
-    logger.info(spider_config.REDIS_PASSWORD)
     _thread.start_new_thread(Spider().start, ())
     WebServer().start()
 

@@ -10,6 +10,8 @@ class Config:
     REDIS_PORT = 6379
     REDIS_HOST = '127.0.0.1'
     REDIS_PASSWORD = None
+    REDIS_LOCK_KEY = 'vcode-spider-task-lock'
+    REDIS_TASK_LIST = 'vcode-spider-task-list'
     OJ_NAMESPACE_LIST = ['SDUT', 'HDU', 'POJ']
     WEB_PORT = 8000
 
