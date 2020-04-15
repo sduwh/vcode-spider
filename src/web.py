@@ -7,7 +7,7 @@ import uuid
 
 from models import Response
 from storage import RedisChannelStorage
-from common import TARGET_TOPIC
+from common import REDIS_TARGET_TOPIC
 from logger import logger
 from config import spider_config
 
@@ -33,7 +33,7 @@ class ProblemHandler(BaseHandler, ABC):
                 json.dumps(dict(Response(code=Response.FAIL, data=None, message="key and oj param is required"))))
         else:
             params['task_id'] = uuid.uuid1().hex
-            self.storage.save(TARGET_TOPIC, json.dumps(params))
+            self.storage.save(REDIS_TARGET_TOPIC, json.dumps(params))
             logger.info('create crawl problem-{}-{} success'.format(params['oj'], params['key']))
             self.finish(json.dumps(dict(Response(data=params))))
 

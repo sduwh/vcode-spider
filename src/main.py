@@ -8,10 +8,10 @@ from crawler import Crawlers
 from models import Problem, Task, Response
 from storage import Storage, RedisChannelStorage
 from logger import logger
-from common import PROBLEM_TOPIC, TARGET_TOPIC, TARGET_RESULT_TOPIC, NAMESPACE_TOPIC
+from common import REDIS_PROBLEM_TOPIC, REDIS_TARGET_TOPIC, REDIS_TARGET_RESULT_TOPIC, REDIS_NAMESPACE_TOPIC, \
+    REDIS_LOCK_KEY, REDIS_TASK_LIST
 from exceptions import CrawlerException
 from config import spider_config
-import socket
 
 
 class Dispatcher(threading.Thread):
@@ -21,8 +21,8 @@ class Dispatcher(threading.Thread):
         self._channel = RedisChannelStorage(host=spider_config.REDIS_HOST,
                                             port=spider_config.REDIS_PORT,
                                             password=spider_config.REDIS_PASSWORD)
-        self.lock_key = spider_config.REDIS_LOCK_KEY
-        self.task_list_topic = spider_config.REDIS_TASK_LIST
+        self.lock_key = REDIS_LOCK_KEY
+        self.task_list_topic = REDIS_TASK_LIST
 
     def run(self):
         while True:
@@ -50,10 +50,10 @@ class Worker(threading.Thread):
             task: Task = self._queue.get()
             try:
                 problem: Problem = Crawlers.crawl(task.namespace, task.key)
-                self._storage.save(PROBLEM_TOPIC, dict(problem))
+                self._storage.save(REDIS_PROBLEM_TOPIC, dict(problem))
                 logger.info('crawl problem-{} success'.format(problem.base_info()))
                 if task.task_id is not "":
-                    self._storage.save(TARGET_RESULT_TOPIC,
+                    self._storage.save(REDIS_TARGET_RESULT_TOPIC,
                                        dict(Response(code=Response.SUCCESS,
                                                      data={'task_id': task.task_id},
                                                      message='success')))
@@ -61,13 +61,13 @@ class Worker(threading.Thread):
                         'task: crawl problem-{} success'.format(problem.base_info()))
             except KeyError:
                 logger.error({'task_id': task.task_id, 'message': 'The task is failed, check the OJ'})
-                self._storage.save(TARGET_RESULT_TOPIC,
+                self._storage.save(REDIS_TARGET_RESULT_TOPIC,
                                    dict(Response(code=Response.FAIL,
                                                  data={'task_id': task.task_id},
                                                  message='The task is failed, check the OJ')))
             except CrawlerException as e:
                 logger.error({'task_id': task.task_id, 'message': e})
-                self._storage.save(TARGET_RESULT_TOPIC,
+                self._storage.save(REDIS_TARGET_RESULT_TOPIC,
                                    dict(Response(code=Response.FAIL,
                                                  data={'task_id': task.task_id},
                                                  message='The task is failed, check the key exist')))
@@ -83,7 +83,7 @@ class Consumer(threading.Thread):
 
     def run(self) -> None:
         while True:
-            target = self._storage.take(TARGET_TOPIC)
+            target = self._storage.take(REDIS_TARGET_TOPIC)
             self._queue.put(Task(namespace=target.get('oj'), key=target.get('key'), task_id=target.get('task_id')))
 
 
@@ -105,7 +105,7 @@ class Spider:
 
     def start(self):
         logger.info('[*]spider starting.....')
-        self._storage.set(topic=NAMESPACE_TOPIC, data=",".join(spider_config.OJ_NAMESPACE_LIST))
+        self._storage.set(topic=REDIS_NAMESPACE_TOPIC, data=",".join(spider_config.OJ_NAMESPACE_LIST))
         self._dispatcher.start()
         for w in self._workers:
             w.start()
