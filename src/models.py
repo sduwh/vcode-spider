@@ -67,3 +67,27 @@ class Task(Base, ABC):
         self.namespace: str = namespace
         self.key: str = key
         self.task_id = task_id
+
+    def keys(self):
+        return (
+            'namespace',
+            'key',
+            'message'
+        )
+
+
+class TaskResult(Base, ABC):
+    SUCCESS = 'success'
+    FAIL = 'fail'
+
+    def __init__(self, result=FAIL, task_id='', message=''):
+        self.result = result
+        self.task_id = task_id
+        self.message = message
+
+    def keys(self):
+        return (
+            'result',
+            'task_id',
+            'message'
+        )

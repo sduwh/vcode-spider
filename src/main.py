@@ -5,7 +5,7 @@ import _thread
 from queue import Queue
 from web import WebServer
 from crawler import Crawlers
-from models import Problem, Task, Response
+from models import Problem, Task, TaskResult
 from storage import Storage, RedisChannelStorage
 from logger import logger
 from common import REDIS_PROBLEM_TOPIC, REDIS_TARGET_TOPIC, REDIS_TARGET_RESULT_TOPIC, REDIS_NAMESPACE_TOPIC, \
@@ -54,23 +54,23 @@ class Worker(threading.Thread):
                 logger.info('crawl problem-{} success'.format(problem.base_info()))
                 if task.task_id is not "":
                     self._storage.save(REDIS_TARGET_RESULT_TOPIC,
-                                       dict(Response(code=Response.SUCCESS,
-                                                     data={'task_id': task.task_id},
-                                                     message='success')))
+                                       dict(TaskResult(result=TaskResult.SUCCESS,
+                                                       task_id=task.task_id,
+                                                       message='success')))
                     logger.info(
                         'task: crawl problem-{} success'.format(problem.base_info()))
             except KeyError:
                 logger.error({'task_id': task.task_id, 'message': 'The task is failed, check the OJ'})
                 self._storage.save(REDIS_TARGET_RESULT_TOPIC,
-                                   dict(Response(code=Response.FAIL,
-                                                 data={'task_id': task.task_id},
-                                                 message='The task is failed, check the OJ')))
+                                   dict(TaskResult(result=TaskResult.FAIL,
+                                                   task_id=task.task_id,
+                                                   message='The task is failed, check the OJ')))
             except CrawlerException as e:
                 logger.error({'task_id': task.task_id, 'message': e})
                 self._storage.save(REDIS_TARGET_RESULT_TOPIC,
-                                   dict(Response(code=Response.FAIL,
-                                                 data={'task_id': task.task_id},
-                                                 message='The task is failed, check the key exist')))
+                                   dict(TaskResult(result=TaskResult.FAIL,
+                                                   task_id=task.task_id,
+                                                   message='The task is failed, check the key exist')))
             except Exception as e:
                 logger.exception(e)
 
