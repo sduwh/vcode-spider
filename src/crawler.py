@@ -40,10 +40,10 @@ class POJCrawler(Crawler):
 
         desc_nodes = bs.select(".ptx")
         try:
-            problem.description = desc_nodes[0].get_text()
-            problem.input = desc_nodes[1].get_text()
-            problem.output = desc_nodes[2].get_text()
-            problem.hint = desc_nodes[3].get_text()
+            problem.description = desc_nodes[0].prettify()
+            problem.input = desc_nodes[1].prettify()
+            problem.output = desc_nodes[2].prettify()
+            problem.hint = desc_nodes[3].prettify()
             problem.source = desc_nodes[4].get_text()
         except IndexError:
             pass
@@ -54,6 +54,7 @@ class POJCrawler(Crawler):
             problem.sample_output = sample_nodes[1].get_text()
         except IndexError:
             pass
+        problem.language = ['C++', "JAVA", "C"]
         return problem
 
 
@@ -92,6 +93,7 @@ class HDUCrawler(Crawler):
             problem.hint = desc_nodes[6].get_text()
         except IndexError:
             pass
+        problem.language = ['C++', "JAVA", "C"]
         return problem
 
 
@@ -118,7 +120,7 @@ class SDUTCrawler(Crawler):
         problem.sample_output = meta_nodes.get('sampleOutput')
         problem.memory_limit = meta_nodes.get('memoryLimit')
         problem.time_limit = meta_nodes.get('timeLimit')
-
+        problem.language = ['C++', "JAVA", "C"]
         return problem
 
 

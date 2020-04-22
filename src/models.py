@@ -25,6 +25,7 @@ class Problem(Base):
         self.sample_output: Optional[str] = None
         self.hint: Optional[str] = None
         self.source: Optional[str] = None
+        self.language: Optional[list] = None
 
     def base_info(self):
         return self.origin + self.origin_id + self.title
@@ -41,7 +42,8 @@ class Problem(Base):
                 'sample_input',
                 'sample_output',
                 'hint',
-                'source')
+                'source',
+                'language')
 
 
 class Response(Base):
