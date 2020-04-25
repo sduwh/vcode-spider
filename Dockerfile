@@ -6,6 +6,6 @@ COPY . /app
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir -r /app/requestments.txt
+RUN pip install --no-cache-dir -r /app/requestments.txt -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
 
 ENTRYPOINT ["python3", "/app/src/main.py"]
