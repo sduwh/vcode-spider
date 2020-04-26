@@ -5,3 +5,6 @@ REDIS_TARGET_RESULT_TOPIC = 'vcode-spider-target-result'  # 爬虫将任务结�
 REDIS_NAMESPACE_TOPIC = 'vcode-spider-namespace'  # 爬虫在启动时将支持的oj发送至此key
 REDIS_LOCK_KEY = 'vcode-spider-task-lock'  # 爬虫的分布式锁，防止重复生产任务
 REDIS_TASK_LIST = 'vcode-spider-task-list'  # 爬虫的自身生成的任务队列
+
+# regular
+IMAGE_TAG_REGULAR = r'<img.*?src="(.*?)".*?/>'

@@ -4,6 +4,15 @@ from bs4 import BeautifulSoup
 from models import Problem
 from exceptions import CrawlerException
 from logger import logger
+from common import IMAGE_TAG_REGULAR
+
+
+def replace_image_src(regular, target, add_origin) -> str:
+    changed_str = target
+    matched_list = re.findall(regular, changed_str)
+    for item in matched_list:
+        changed_str = re.sub(item, add_origin + item, changed_str)
+    return changed_str
 
 
 class Crawler:
@@ -14,7 +23,8 @@ class Crawler:
 
 
 class POJCrawler(Crawler):
-    NAMESPACE = "POJ"
+    NAMESPACE = 'POJ'
+    OJ_ORIGIN = 'http://poj.org/'
 
     def crawl(self, key: str) -> Problem:
         logger.info("[*] start crawl problem POJ-{}".format(key))
@@ -47,7 +57,7 @@ class POJCrawler(Crawler):
             problem.source = desc_nodes[4].get_text()
         except IndexError:
             pass
-
+        problem.description = replace_image_src(IMAGE_TAG_REGULAR, problem.description, self.OJ_ORIGIN)
         sample_nodes = bs.select(".sio")
         try:
             problem.sample_input = sample_nodes[0].get_text()
@@ -60,6 +70,7 @@ class POJCrawler(Crawler):
 
 class HDUCrawler(Crawler):
     NAMESPACE = "HDU"
+    ORIGIN = 'http://acm.hdu.edu.cn/'
 
     def crawl(self, key: str) -> Problem:
         logger.info("[*] start crawl problem HDU-{}".format(key))
@@ -84,21 +95,23 @@ class HDUCrawler(Crawler):
 
         desc_nodes = bs.select(".panel_content")
         try:
-            problem.description = desc_nodes[0].get_text()
-            problem.input = desc_nodes[1].get_text()
-            problem.output = desc_nodes[2].get_text()
+            problem.description = desc_nodes[0].prettify()
+            problem.input = desc_nodes[1].prettify()
+            problem.output = desc_nodes[2].prettify()
             problem.sample_input = desc_nodes[3].get_text()
             problem.sample_output = desc_nodes[4].get_text()
             problem.source = desc_nodes[5].get_text()
             problem.hint = desc_nodes[6].get_text()
         except IndexError:
             pass
+        problem.description = replace_image_src(IMAGE_TAG_REGULAR, problem.description, self.ORIGIN)
         problem.language = ['C++', "JAVA", "C"]
         return problem
 
 
 class SDUTCrawler(Crawler):
     NAMESPACE = "SDUT"
+    ORIGIN = 'https://acm.sdut.edu.cn/'
 
     def crawl(self, key: str) -> Problem:
         logger.info("[*] start crawl problem SDUT-{}".format(key))
@@ -112,6 +125,7 @@ class SDUTCrawler(Crawler):
 
         problem.title = meta_nodes.get('title')
         problem.description = meta_nodes.get('description')
+        problem.description = replace_image_src(IMAGE_TAG_REGULAR, problem.description, self.ORIGIN)
         problem.input = meta_nodes.get('input')
         problem.output = meta_nodes.get('output')
         problem.hint = meta_nodes.get('hint')
